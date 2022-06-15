@@ -1,12 +1,16 @@
 package com.atm.BOLayer;
 
-public class Admin implements java.io.Serializable{
+import java.io.Serializable;
+public class Admin implements Serializable{
     private String Username;
     private String Pin;
     
     public Admin(String username, String pin) {
         Username = username;
         Pin = pin;
+    }
+
+    public Admin() {
     }
 
     public String getUsername() {
