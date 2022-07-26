@@ -10,37 +10,44 @@ import java.util.Collections;
 import com.atm.BOLayer.Admin;
 import com.atm.BOLayer.Customer;
 import com.atm.BOLayer.Transaction;
-import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 
 public class Data {
     
     // Appends object to a file in json format
-    public <T> void AddToFile(T obj){
+    public <T> void AddToFile(ArrayList<T> obj, Boolean appending){
         String fileBoString = null;
         String jsonString = null;
-        fileBoString = getFileToWrite(obj, fileBoString);
+        fileBoString = getFileToWrite(obj.get(0), fileBoString);
 
-        try (FileWriter fWriter = new FileWriter(fileBoString, true);){
+        try (FileWriter fWriter = new FileWriter(fileBoString, appending);){
+// TODO: Fix the way string is write to the file, it may write each object in new line
             ObjectMapper mapper = new ObjectMapper();
             jsonString = mapper.writeValueAsString(obj);
-
             fWriter.write(jsonString + System.lineSeparator());
 
-            // Serialize the object and save the binary data
-            // FileOutputStream fileOut = new FileOutputStream(Admin);
-            // ObjectOutputStream out = new ObjectOutputStream(fileOut);
-            // out.writeObject(obj);
-            // out.close();
-            // fileOut.close();
-        
         } catch (IOException e) {
             System.out.print(e.getMessage());
         }
     }
 
-    // Choose the write file to store an object.
+    // Clears last data and save new list to file in json format
+    public <T> void saveToFile(ArrayList<T> list) throws JsonProcessingException{
+        
+        if(list.get(0) instanceof Admin){
+            AddToFile(list, false);
+        }
+        else if(list.get(0) instanceof Customer){
+            AddToFile(list, false);
+        }
+
+        // Appends the other objects of list to the file
+
+    }
+
+    // Choose the file to store an object.
     private <T> String getFileToWrite(T obj, String fileBoString) {
         // Check what is the right file to write the object
         if(obj instanceof Admin){
@@ -53,77 +60,57 @@ public class Data {
         return fileBoString;
     }
 
-    // Returns a list of objects from a file
-    public <T> ArrayList<T> ReadFile(String FileName){
-        // List<String> lines = Collections.emptyList();
-        // List<Admin> list= new ArrayList<Admin>();
-        // ObjectMapper mapper = new ObjectMapper();
-        // try {
-        //     lines = Files.readAllLines(Paths.get("Admin.txt"));
-        //     for(String Obj : lines){
-        //         Admin adminObject = mapper.readValue(Obj, Admin.class);
-        //         list.add(adminObject);
-        //         System.out.println(Obj);
-        //     }
-        // } catch (IOException e) {
-        //     // TODO Auto-generated catch block
-        //     e.printStackTrace();
-        // }
-
+    // Returns a list of Admin objects from a file
+    public List<Admin> ReadAdminFile(){
         List<String> lines = Collections.emptyList();
-        List<T> list= new ArrayList<T>();
+        List<Admin> list = new ArrayList<Admin>();
         ObjectMapper mapper = new ObjectMapper();
         try {
-            lines = Files.readAllLines(Paths.get(FileName+".txt"));
-            //List<Admin> myAdmins = mapper.readValue(lines, new TypeReference<List<Admin>>(){ });
-            //assertThat(asList.get(0), instanceOf(Admin.class));
+            lines = Files.readAllLines(Paths.get("Admin.txt"));
             for(String Obj : lines){
                 Admin adminObject = mapper.readValue(Obj, Admin.class);
                 list.add(adminObject);
-                //System.out.println(Obj);
-            }
-            for(Admin AdminObj : list){
-                System.out.println(AdminObj.getUsername());
             }
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        
-        return null;
-        
+        return list;
     }
 
-    public <T> ArrayList<T> ReadFile2(String FileName, Class<?> contentClass){
-        
+    // Returns a list of Customer objects from a file
+    public List<Customer> ReadCustomerFile(String FileName){
         List<String> lines = Collections.emptyList();
-        List<T> list= new ArrayList<T>();
+        List<Customer> list = new ArrayList<Customer>();
         ObjectMapper mapper = new ObjectMapper();
         try {
-            //JavaType type = mapper.getTypeFactory().constructParametricType(Data.class, contentClass);
-            lines = Files.readAllLines(Paths.get(FileName+".txt"));
-            
+            lines = Files.readAllLines(Paths.get("Customer.txt"));
             for(String Obj : lines){
-                
-                list.add(mapper.readValue(Obj, contentClass));
-                //System.out.println(Obj);
-            }
-            for(Admin AdminObj : list){
-                System.out.println(AdminObj.getUsername());
+                Customer customerObject = mapper.readValue(Obj, Customer.class);
+                list.add(customerObject);
             }
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        
-        return null;
-        
+        return list;
     }
-    
-    public static <T> List<T> parseJsonArray(String json,Class<T> classOnWhichArrayIsDefined)throws IOException, ClassNotFoundException {
+
+    // Returns a list of Transaction objects from a file
+    public List<Transaction> ReadTransactionsFile(String FileName){
+        List<String> lines = Collections.emptyList();
+        List<Transaction> list = new ArrayList<Transaction>();
         ObjectMapper mapper = new ObjectMapper();
-        Class<T[]> arrayClass = (Class<T[]>) Class.forName("[L" + classOnWhichArrayIsDefined.getName() + ";");
-        T[] objects = mapper.readValue(json, arrayClass);
-        return Arrays.asList(objects);
-}
+        try {
+            lines = Files.readAllLines(Paths.get("Transaction.txt"));
+            for(String Obj : lines){
+                Transaction transactionObject = mapper.readValue(Obj, Transaction.class);
+                list.add(transactionObject);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    
+
 }
